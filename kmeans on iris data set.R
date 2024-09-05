@@ -14,7 +14,6 @@ df<-na.omit(df)
 install.packages("factoextra")
 library(factoextra)
 
-
 #Elbow test: to find optimal no of clusters
 
 fviz_nbclust(df,kmeans,method="wss")
