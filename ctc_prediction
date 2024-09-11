@@ -1,0 +1,72 @@
+
+# Step 1: Load and Understand the Data
+file <- read.csv("C:\\Users\\jeena\\Downloads\\ctc_data.csv")
+head(file)
+
+# Print the column names
+names(file)
+
+# Print no. of rows and columns
+nrow(file)
+ncol(file)
+
+# Load necessary libraries
+library(tidyverse)  # For data manipulation
+library(caTools) # For data splitting and preprocessing
+library(randomForest) # For Random Forest model
+
+# Step 2: Data Preprocessing
+# Dropping the Serial Number as it is not useful for modeling
+file <- file %>% select(-S.No.)
+
+# Print the column names
+names(file)
+
+# Convert categorical variables to factors
+file$College <- as.factor(file$College)
+file$Role <- as.factor(file$Role)
+file$City.type<- as.factor(file$City.type)
+
+# Check for missing values and handle them
+sum(is.na(file))
+file <- na.omit(file)
+
+# Split the data into training and testing sets
+set.seed(123)
+sp=sample.split(file$CTC, SplitRatio=0.8)
+train_set_ctc <- subset(file, sp == TRUE)
+test_set_ctc <- subset(file, sp == FALSE)
+
+# Step 3: Train a Random Forest model
+set.seed(123)
+train_set_ctc$CTC <- as.factor(train_set_ctc$CTC)
+test_set_ctc$CTC <- as.factor(test_set_ctc$CTC)
+ctc_rf_model <- randomForest(CTC ~ ., data = train_set_ctc, ntree = 100, importance = TRUE)
+ctc_rf_model
+
+#Predict on the test set
+#test_set_ctc$CTC <-as.factor(test_set_ctc$CTC)
+predictions <- predict(ctc_rf_model, newdata = test_set_ctc)
+print(predictions)
+
+
+#Step 4: Evaluate the model
+
+library(Metrics)
+## Warning: package 'Metrics' was built under R version 4.4.1
+# Converts factor to numeric
+test_set_ctc$CTC <- as.numeric(test_set_ctc$CTC) 
+predictions <- as.numeric(predictions) 
+
+# Evaluate the model using Metrics library
+mae <- mae(test_set_ctc$CTC, predictions)
+mse <- mse(test_set_ctc$CTC, predictions)
+rmse <- rmse(test_set_ctc$CTC, predictions)
+
+# Print the evaluation metrics
+print(paste('Mean Absolute Error (MAE):', round(mae, 2)))
+
+print(paste('Mean Squared Error (MSE):', round(mse, 2)))
+
+print(paste('Root Mean Squared Error (RMSE):', round(rmse, 2)))
+
