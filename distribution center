@@ -42,6 +42,7 @@ cluster_summary <- data %>%
   )
 cluster_summary
 
+
 library(ggplot2)
 
 ggplot(data, aes(x = Distance_Feature, y = Daily_Demand, colour = Cluster)) +
